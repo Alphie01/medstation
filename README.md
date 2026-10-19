@@ -25,12 +25,14 @@ Dart monorepo (pub workspace):
 ```bash
 git clone https://github.com/Alphie01/medstation.git && cd medstation
 cp server/.env.example server/.env      # JWT_SECRET (≥32 karakter) ve OPENAI_API_KEY girin
-docker compose up -d --build            # db + api + updater (ilk çalıştırmada TİTCK verisini kendisi yükler)
+cp .env.example .env                    # CLOUDFLARE_TUNNEL_TOKEN girin
+docker compose up -d --build            # db + api + updater + cloudflared (ilk çalıştırmada TİTCK verisini kendisi yükler)
 curl http://localhost:25925/health
 docker compose logs -f updater          # ilk TİTCK yüklemesi ~1-2 dk
 ```
 
-- API dışarıya `API_PORT` (varsayılan **25925**) ile açılır: `API_PORT=26001 docker compose up -d`.
+- **Alan adı (Cloudflare Tunnel):** kök dizinde `cp .env.example .env`, `CLOUDFLARE_TUNNEL_TOKEN` değerini girin (`COMPOSE_PROFILES=tunnel` tüneli açar). Cloudflare Zero Trust › Networks › Tunnels'ta tünele *public hostname* ekleyin: örn. `api.alanadiniz.com` → servis `http://api:8787`. TLS Cloudflare'de sonlanır; sunucuda port açmaya gerek yoktur.
+- Tünel kullanılırken `API_BIND=127.0.0.1` ile API yalnızca sunucu içinden ve tünelden erişilebilir olur. Tünelsiz doğrudan erişim için `API_BIND=0.0.0.0`, port `API_PORT` (varsayılan **25925**).
 - Postgres yalnızca `127.0.0.1:${DB_PORT:-5433}` üzerinde dinler; dışarıdan erişilemez, sunucudaki diğer projelerle çakışmaz.
 - Gizli değerler yalnızca `server/.env` dosyasındadır (git'e girmez).
 - **Otomatik güncelleme (`updater` servisi):** açılışta ve her `SYNC_EVERY` (varsayılan 6 saat) sürede TİTCK [Ruhsatlı Ürünler](https://www.titck.gov.tr/dinamikmodul/85) ve [SKRS](https://www.titck.gov.tr/dinamikmodul/43) sayfalarındaki en yeni XLSX'i bulur; daha önce içe aktarılandan farklıysa indirip tek işlemde yükler (yeni liste tamamen yazılana kadar eski liste geçerli kalır). Duyurular her çalışmada yenilenir, eskiler korunur. Okunan ürün sayısı şüpheli derecede azsa (dosya yapısı değişmişse) mevcut veri korunur ve çalışma "error" olarak kaydedilir. Çalışmalar `sync_runs` tablosunda ve uygulamada *Veri kaynakları* ekranında görünür.
@@ -42,17 +44,17 @@ docker compose logs -f updater          # ilk TİTCK yüklemesi ~1-2 dk
 - İlk kullanıcı: `docker compose exec api create_user --email ... --name "..." --password "..." --pharmacy "..."`
 - KÜB/KT (asistan): `docker compose exec api sh -c 'fetch_kubkt --out /tmp/kub --query "PAROL 500 MG TABLET" && ingest_documents --manifest /tmp/kub/manifest.json --version 2026-10-20'`
 - Elle içe aktarma (isteğe bağlı): `ingest_titck --ruhsatli dosya.xlsx --ruhsatli-version … --skrs dosya.xlsx --skrs-version …`
-- Üretimde `MEDSTATION_ENV=prod` kullanın ve API'yi TLS'li bir alan adı (ters vekil) arkasına alın.
+- Üretimde `server/.env` içinde `MEDSTATION_ENV=prod` kullanın.
 
 ## Uygulama yapılandırması
 
 ```bash
 cd app
-cp .env.example .env        # API_BASE=http://81.168.70.119:25925
+cp .env.example .env        # API_BASE=https://api.alanadiniz.com (Cloudflare tüneli)
 flutter run --dart-define-from-file=.env
 ```
 
-Release derlemesi yalnızca `https://` API kabul eder; TLS eklenene kadar geçici test için `.env` içinde `ALLOW_INSECURE_HTTP=true`.
+Release derlemesi yalnızca `https://` API kabul eder; tünel ile bu sağlanır. Tünelsiz `http://IP:port` testi için `.env` içinde `ALLOW_INSECURE_HTTP=true`.
 
 ## Yerel geliştirme
 
