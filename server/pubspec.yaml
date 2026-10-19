@@ -1,0 +1,24 @@
+name: medstation_server
+description: MedStation backend — ilaç verisi, kural motoru, AI asistan proxy, stok.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+environment:
+  sdk: ^3.9.0
+dependencies:
+  medstation_core: any
+  shelf: ^1.4.2
+  shelf_router: ^1.1.4
+  postgres: ^3.4.0
+  dart_jsonwebtoken: ^2.14.0
+  crypto: ^3.0.5
+  http: ^1.2.2
+  html: ^0.15.4
+  logging: ^1.2.0
+  args: ^2.5.0
+  uuid: ^4.4.0
+  archive: ^3.6.1
+  xml: ^6.6.1
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0

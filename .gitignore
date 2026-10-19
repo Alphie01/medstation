@@ -1,0 +1,9 @@
+.dart_tool/
+build/
+.env
+*.iml
+.idea/
+pubspec_overrides.yaml
+**/test/failures/
+app/ios/Pods/
+*.log

@@ -1,0 +1,12 @@
+name: medstation_core
+description: MedStation ortak alan modelleri, kural motoru, GS1 ayrıştırıcı ve hesaplayıcılar.
+publish_to: none
+version: 0.1.0
+resolution: workspace
+environment:
+  sdk: ^3.9.0
+dependencies:
+  meta: ^1.15.0
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0

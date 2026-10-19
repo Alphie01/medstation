@@ -1,0 +1,8 @@
+name: medstation_workspace
+publish_to: none
+environment:
+  sdk: ^3.9.0
+workspace:
+  - packages/medstation_core
+  - server
+  - app

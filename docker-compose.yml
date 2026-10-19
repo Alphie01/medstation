@@ -1,0 +1,15 @@
+services:
+  db:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: etken
+      POSTGRES_PASSWORD: etken
+      POSTGRES_DB: etken
+    ports: ["5433:5432"]
+    volumes: [etken-db:/var/lib/postgresql/data]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U etken"]
+      interval: 2s
+      retries: 30
+volumes:
+  etken-db:

@@ -1,0 +1,26 @@
+{
+  "_comment": "TİTCK Excel başlık eşlemesi (büyük/küçük harf ve Türkçe karakter duyarsız; '*' ile biten takma ad önek eşleşmesidir). 'ruhsatli': Ruhsatlı Beşeri Tıbbi Ürünler Listesi (titck.gov.tr/dinamikmodul/85). 'skrs': SKRS E-Reçete İlaç Listesi (titck.gov.tr/dinamikmodul/43). Başlıklar değişirse buraya ekleyin; gerekli sütun bulunamazsa içe aktarma durur.",
+  "ruhsatli": {
+    "required": ["barcode", "name", "ingredients"],
+    "columns": {
+      "barcode": ["BARKOD"],
+      "name": ["ÜRÜN ADI", "ILAC ADI"],
+      "ingredients": ["ETKİN MADDE", "ETKIN MADDE"],
+      "atc": ["ATC KODU"],
+      "firm": ["RUHSAT SAHİBİ", "FIRMA ADI"],
+      "licenseNo": ["RUHSAT NUMARASI"],
+      "license": ["RUHSATI ASKIDA*"]
+    }
+  },
+  "skrs": {
+    "required": ["barcode", "name"],
+    "columns": {
+      "barcode": ["Barkod"],
+      "name": ["İlaç Adı"],
+      "rxType": ["Reçete Türü"],
+      "status": ["Durumu"],
+      "atc": ["ATC Kodu"],
+      "firm": ["Firma Adı"]
+    }
+  }
+}

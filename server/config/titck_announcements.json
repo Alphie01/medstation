@@ -1,0 +1,8 @@
+{
+  "_comment": "TİTCK duyuru listesi (https://www.titck.gov.tr/duyuru) CSS seçicileri, 19.10.2026 itibarıyla doğrulandı. Sayfa yapısı değişirse güncelleyin; eşleşmeyen öğeler raporlanır.",
+  "item": "a.announcement-v2-card",
+  "title": "h2.announcement-v2-title",
+  "date": ".anno-badge-date",
+  "tags": ".anno-badge-tag",
+  "summary": ".announcement-v2-desc"
+}
