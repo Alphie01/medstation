@@ -7,3 +7,4 @@ pubspec_overrides.yaml
 **/test/failures/
 app/ios/Pods/
 *.log
+.DS_Store
