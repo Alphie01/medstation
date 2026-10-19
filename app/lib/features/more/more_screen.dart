@@ -108,6 +108,34 @@ class SourcesScreen extends ConsumerWidget {
           onRefresh: () async => ref.invalidate(metaProvider),
           child: ListView(padding: const EdgeInsets.all(16), children: [
             if (m.anySample) ...[const SampleBanner(), const SizedBox(height: 12)],
+            EtkenCard(
+              child: Row(children: [
+                Icon(
+                  m.lastSync == null
+                      ? Icons.sync_disabled_rounded
+                      : m.lastSync!['status'] == 'error'
+                          ? Icons.sync_problem_rounded
+                          : Icons.sync_rounded,
+                  color: m.lastSync?['status'] == 'error' ? EtkenColors.riskCritical : EtkenColors.navy,
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                    Text('Otomatik güncelleme', style: bodyStyle(16, weight: FontWeight.w700)),
+                    Text(
+                      m.lastSync == null
+                          ? 'Güncelleme servisi henüz çalışmadı.'
+                          : 'Son kontrol ${fmtDateTime(DateTime.parse(m.lastSync!['startedAt'] as String))}'
+                              '${m.lastSync!['status'] == 'error' ? ' · hata, yöneticiye bildirin' : ' · başarılı'}',
+                      style: bodyStyle(13, color: EtkenColors.muted),
+                    ),
+                    Text('TİTCK listeleri 6 saatte bir kontrol edilir; yeni yayın varsa içe aktarılır.',
+                        style: bodyStyle(12, color: EtkenColors.muted)),
+                  ]),
+                ),
+              ]),
+            ),
+            const SizedBox(height: 10),
             for (final e in _kinds.entries) ...[
               EtkenCard(
                 child: Builder(builder: (_) {

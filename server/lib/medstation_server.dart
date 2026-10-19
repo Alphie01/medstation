@@ -13,3 +13,4 @@ export 'src/repos/clinical_repo.dart';
 export 'src/repos/drug_repo.dart';
 export 'src/repos/ops_repo.dart';
 export 'src/repos/tenant_repo.dart';
+export 'src/ingest/sync.dart';

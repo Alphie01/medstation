@@ -12,7 +12,7 @@ COPY packages/medstation_core packages/medstation_core
 COPY server server
 RUN dart pub get --offline \
  && mkdir -p /out/bin \
- && for t in server migrate create_user seed_dev ingest_titck ingest_announcements ingest_documents fetch_kubkt import_clinical; do \
+ && for t in server sync_titck migrate create_user seed_dev ingest_titck ingest_announcements ingest_documents fetch_kubkt import_clinical; do \
       dart compile exe server/bin/$t.dart -o /out/bin/$t; \
     done
 

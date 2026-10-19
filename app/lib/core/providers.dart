@@ -31,6 +31,9 @@ class Meta {
   bool get assistantAvailable => raw['assistantAvailable'] as bool;
   bool get anySample => sources.any((s) => s['isSample'] == true);
 
+  /// Last automatic TİTCK update run (null if the updater never ran).
+  Map<String, dynamic>? get lastSync => raw['lastSync'] as Map<String, dynamic>?;
+
   Map<String, dynamic>? source(String kind) =>
       sources.where((s) => (s['kind'] as String).startsWith(kind)).firstOrNull;
 }

@@ -7,7 +7,14 @@ final _log = Logger('db');
 
 typedef Db = Pool<void>;
 
-Db openDb(String url) => Pool.withUrl(url);
+/// The driver's pool defaults to a single connection, which serialises all
+/// requests (and deadlocks code that holds one connection while querying).
+/// Use 10 unless the URL sets `max_connection_count`.
+Db openDb(String url) {
+  final u = Uri.parse(url);
+  if (u.queryParameters.containsKey('max_connection_count')) return Pool.withUrl(url);
+  return Pool.withUrl(u.replace(queryParameters: {...u.queryParameters, 'max_connection_count': '10'}).toString());
+}
 
 /// Applies `migrations/*.sql` in name order, once each.
 Future<void> migrate(Db db, {String dir = 'migrations'}) async {

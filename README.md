@@ -25,21 +25,23 @@ Dart monorepo (pub workspace):
 ```bash
 git clone https://github.com/Alphie01/medstation.git && cd medstation
 cp server/.env.example server/.env      # JWT_SECRET (≥32 karakter) ve OPENAI_API_KEY girin
-docker compose up -d --build            # db + api
-docker compose exec api create_user --email ... --name "..." --password "..." --pharmacy "..."
+docker compose up -d --build            # db + api + updater (ilk çalıştırmada TİTCK verisini kendisi yükler)
 curl http://localhost:25925/health
+docker compose logs -f updater          # ilk TİTCK yüklemesi ~1-2 dk
 ```
 
 - API dışarıya `API_PORT` (varsayılan **25925**) ile açılır: `API_PORT=26001 docker compose up -d`.
 - Postgres yalnızca `127.0.0.1:${DB_PORT:-5433}` üzerinde dinler; dışarıdan erişilemez, sunucudaki diğer projelerle çakışmaz.
 - Gizli değerler yalnızca `server/.env` dosyasındadır (git'e girmez).
-- Veri yükleme araçları imajın içindedir:
+- **Otomatik güncelleme (`updater` servisi):** açılışta ve her `SYNC_EVERY` (varsayılan 6 saat) sürede TİTCK [Ruhsatlı Ürünler](https://www.titck.gov.tr/dinamikmodul/85) ve [SKRS](https://www.titck.gov.tr/dinamikmodul/43) sayfalarındaki en yeni XLSX'i bulur; daha önce içe aktarılandan farklıysa indirip tek işlemde yükler (yeni liste tamamen yazılana kadar eski liste geçerli kalır). Duyurular her çalışmada yenilenir, eskiler korunur. Okunan ürün sayısı şüpheli derecede azsa (dosya yapısı değişmişse) mevcut veri korunur ve çalışma "error" olarak kaydedilir. Çalışmalar `sync_runs` tablosunda ve uygulamada *Veri kaynakları* ekranında görünür.
   ```bash
-  docker compose cp ruhsatli.xlsx api:/tmp/ && docker compose cp skrs.xlsx api:/tmp/
-  docker compose exec api ingest_titck --ruhsatli /tmp/ruhsatli.xlsx --ruhsatli-version 2026-10-16 --skrs /tmp/skrs.xlsx --skrs-version 2026-10-13
-  docker compose exec api ingest_announcements --page https://www.titck.gov.tr/duyuru --pages 3
-  docker compose exec api sh -c 'fetch_kubkt --out /tmp/kub --query "PAROL 500 MG TABLET" && ingest_documents --manifest /tmp/kub/manifest.json --version 2026-10-20'
+  docker compose logs -f updater          # izleme
+  docker compose exec updater sync_titck --once            # elle tetikleme
+  docker compose exec updater sync_titck --once --force    # dosya aynı olsa da yeniden yükle
   ```
+- İlk kullanıcı: `docker compose exec api create_user --email ... --name "..." --password "..." --pharmacy "..."`
+- KÜB/KT (asistan): `docker compose exec api sh -c 'fetch_kubkt --out /tmp/kub --query "PAROL 500 MG TABLET" && ingest_documents --manifest /tmp/kub/manifest.json --version 2026-10-20'`
+- Elle içe aktarma (isteğe bağlı): `ingest_titck --ruhsatli dosya.xlsx --ruhsatli-version … --skrs dosya.xlsx --skrs-version …`
 - Üretimde `MEDSTATION_ENV=prod` kullanın ve API'yi TLS'li bir alan adı (ters vekil) arkasına alın.
 
 ## Uygulama yapılandırması

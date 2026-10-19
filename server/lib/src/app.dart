@@ -103,6 +103,7 @@ Handler buildApp(Services s) {
         'interactionDbConnected': (await s.clinical.snapshot()).interactionDbConnected,
         'medulaAvailable': s.medula.available,
         'assistantAvailable': s.assistant.ai != null,
+        'lastSync': await _lastSync(s.db),
         'commercialCatalogConnected': (await s.catalog.list(req.user.pharmacyId)).any((x) => x['active'] == true),
       }));
 
@@ -427,6 +428,17 @@ Handler buildApp(Services s) {
       .addMiddleware(securityHeaders())
       .addMiddleware(s.auth.middleware(public: {'health', 'auth/login', 'auth/refresh'}))
       .addHandler(r.call);
+}
+
+Future<Map<String, dynamic>?> _lastSync(Db db) async {
+  final r = await db.execute(
+      "SELECT started_at, finished_at, status FROM sync_runs WHERE status <> 'running' ORDER BY started_at DESC LIMIT 1");
+  if (r.isEmpty) return null;
+  return {
+    'startedAt': (r.first[0] as DateTime).toUtc().toIso8601String(),
+    'finishedAt': (r.first[1] as DateTime?)?.toUtc().toIso8601String(),
+    'status': r.first[2],
+  };
 }
 
 /// Deletes prescription checks older than the retention period (KVKK).

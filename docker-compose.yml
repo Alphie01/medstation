@@ -29,5 +29,22 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # Keeps TİTCK data current: checks the drug lists every 6 hours and
+  # imports a newer publication; refreshes announcements on each run.
+  updater:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: ["sync_titck", "--every", "${SYNC_EVERY:-6h}"]
+    env_file: server/.env
+    environment:
+      DATABASE_URL: postgresql://etken:etken@db:5432/etken?sslmode=disable
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+    healthcheck:
+      disable: true
+
 volumes:
   etken-db:

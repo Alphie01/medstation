@@ -2,6 +2,7 @@ import 'package:medstation_core/medstation_core.dart';
 import 'package:medstation_server/medstation_server.dart';
 import 'package:medstation_server/src/ingest/chunker.dart';
 import 'package:medstation_server/src/ingest/titck_parse.dart';
+import 'package:medstation_server/src/ingest/announcements_import.dart';
 import 'package:test/test.dart';
 
 void main() {
@@ -124,5 +125,24 @@ void main() {
       expect(rxFrom('?'), RxType.bilinmiyor);
       expect(formFromName('X 500 MG FILM KAPLI TABLET'), 'film kapli tablet');
     });
+  });
+
+  test('latest TİTCK publication from module page rows', () {
+    const page = '''
+<table><tbody>
+<tr><td><div class="cell">Ruhsatlı Beşeri Tıbbi Ürünler Listesi</div></td>
+<td><div class="cell"><i></i>09/10/2026</div></td>
+<td><a href="https://titck.gov.tr/storage/a09.xlsx" class="badge">XLSX</a></td></tr>
+<tr><td><div class="cell">Ruhsatlı Beşeri Tıbbi Ürünler Listesi</div></td>
+<td><div class="cell"><i></i>16/10/2026</div></td>
+<td><a href="https://titck.gov.tr/storage/a16.xlsx" class="badge">XLSX</a></td></tr>
+<tr><td>PDF only</td><td>20/10/2026</td><td><a href="/x.pdf">PDF</a></td></tr>
+</tbody></table>''';
+    final p = parseLatestPublication(page, 'https://www.titck.gov.tr/dinamikmodul/85');
+    expect(p.version, '2026-10-16');
+    expect(p.url, 'https://titck.gov.tr/storage/a16.xlsx');
+    expect(() => parseLatestPublication('<p>yok</p>', 'x'), throwsStateError);
+    expect(classifyAnnouncement('İlaç Geri Çekme', const []), 'geriCekme');
+    expect(classifyAnnouncement('Kamuoyunun Dikkatine', const ['Fiyat Duyurusu']), 'fiyat');
   });
 }
