@@ -20,10 +20,42 @@ Dart monorepo (pub workspace):
 - KVKK: hasta kimliği istenmez/saklanmaz; reçete fotoğrafı cihazda OCR'lanır; LLM'e gitmeden önce TCKN/telefon/e-posta/isim çıkarılır; kontrol kayıtları `RETENTION_DAYS` sonunda silinir; tokenlar Keychain/Keystore'da.
 - MEDULA/e-Nabız: yalnızca resmî yetkili entegrasyon için arayüz (`server/lib/src/medula.dart`) var; yetki yoksa `501 integration_not_authorized` döner. Kazıma/taklit yok.
 
-## Yerel kurulum
+## Sunucuda çalıştırma (Docker)
 
 ```bash
-docker compose up -d db                       # Postgres 16 + pgvector, port 5433
+git clone https://github.com/Alphie01/medstation.git && cd medstation
+cp server/.env.example server/.env      # JWT_SECRET (≥32 karakter) ve OPENAI_API_KEY girin
+docker compose up -d --build            # db + api
+docker compose exec api create_user --email ... --name "..." --password "..." --pharmacy "..."
+curl http://localhost:25925/health
+```
+
+- API dışarıya `API_PORT` (varsayılan **25925**) ile açılır: `API_PORT=26001 docker compose up -d`.
+- Postgres yalnızca `127.0.0.1:${DB_PORT:-5433}` üzerinde dinler; dışarıdan erişilemez, sunucudaki diğer projelerle çakışmaz.
+- Gizli değerler yalnızca `server/.env` dosyasındadır (git'e girmez).
+- Veri yükleme araçları imajın içindedir:
+  ```bash
+  docker compose cp ruhsatli.xlsx api:/tmp/ && docker compose cp skrs.xlsx api:/tmp/
+  docker compose exec api ingest_titck --ruhsatli /tmp/ruhsatli.xlsx --ruhsatli-version 2026-10-16 --skrs /tmp/skrs.xlsx --skrs-version 2026-10-13
+  docker compose exec api ingest_announcements --page https://www.titck.gov.tr/duyuru --pages 3
+  docker compose exec api sh -c 'fetch_kubkt --out /tmp/kub --query "PAROL 500 MG TABLET" && ingest_documents --manifest /tmp/kub/manifest.json --version 2026-10-20'
+  ```
+- Üretimde `MEDSTATION_ENV=prod` kullanın ve API'yi TLS'li bir alan adı (ters vekil) arkasına alın.
+
+## Uygulama yapılandırması
+
+```bash
+cd app
+cp .env.example .env        # API_BASE=http://81.168.70.119:25925
+flutter run --dart-define-from-file=.env
+```
+
+Release derlemesi yalnızca `https://` API kabul eder; TLS eklenene kadar geçici test için `.env` içinde `ALLOW_INSECURE_HTTP=true`.
+
+## Yerel geliştirme
+
+```bash
+docker compose up -d db                       # Postgres 16 + pgvector, 127.0.0.1:5433
 cd server
 cp .env.example .env                          # JWT_SECRET'ı değiştirin, OPENAI_API_KEY ekleyin
 set -a; . ./.env; set +a
@@ -40,7 +72,7 @@ Telefon ve Mac aynı Wi-Fi ağında olmalı. Telefon `localhost`'a ulaşamaz; Ma
 ```bash
 ipconfig getifaddr en0                        # ör. 192.168.1.176
 cd app
-flutter run -d <cihaz-id> --dart-define=API_BASE=http://192.168.1.176:8787
+flutter run -d <cihaz-id> --dart-define=API_BASE=http://192.168.1.176:8787   # veya .env ile --dart-define-from-file=.env
 ```
 
 - **iOS:** İlk seferde `app/ios/Runner.xcworkspace`'i Xcode'da açıp *Signing & Capabilities* altında Team seçin. Telefonda Ayarlar › Genel › VPN ve Aygıt Yönetimi'nden geliştiriciye güvenin. Uygulama ilk açılışta "yerel ağ" izni isterse izin verin.

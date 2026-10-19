@@ -2,17 +2,8 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
-	<key>NSCameraUsageDescription</key>
-	<string>Karekod okutmak ve reçete fotoğrafı çekmek için kamera kullanılır. Fotoğraflar cihazda işlenir.</string>
-	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Reçete görüntüsü seçmek için kullanılır. Görüntü cihazda işlenir.</string>
-	<key>NSFaceIDUsageDescription</key>
-	<string>MedStation'u kilitlemek ve açmak için Face ID kullanılır.</string>
-	<key>NSAppTransportSecurity</key>
-	<dict>
-		<key>NSAllowsLocalNetworking</key>
-		<true/>
-	</dict>
+	<key>CADisableMinimumFrameDurationOnPhone</key>
+	<true/>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -35,6 +26,19 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSCameraUsageDescription</key>
+	<string>Karekod okutmak ve reçete fotoğrafı çekmek için kamera kullanılır. Fotoğraflar cihazda işlenir.</string>
+	<key>NSFaceIDUsageDescription</key>
+	<string>MedStation'u kilitlemek ve açmak için Face ID kullanılır.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Reçete görüntüsü seçmek için kullanılır. Görüntü cihazda işlenir.</string>
+	<key>UIApplicationSupportsIndirectInputEvents</key>
+	<true/>
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
@@ -52,9 +56,5 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
-	<key>CADisableMinimumFrameDurationOnPhone</key>
-	<true/>
-	<key>UIApplicationSupportsIndirectInputEvents</key>
-	<true/>
 </dict>
 </plist>

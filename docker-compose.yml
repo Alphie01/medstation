@@ -5,11 +5,29 @@ services:
       POSTGRES_USER: etken
       POSTGRES_PASSWORD: etken
       POSTGRES_DB: etken
-    ports: ["5433:5432"]
+    # Local only: not reachable from outside the host.
+    ports: ["127.0.0.1:${DB_PORT:-5433}:5432"]
     volumes: [etken-db:/var/lib/postgresql/data]
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U etken"]
       interval: 2s
       retries: 30
+
+  api:
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    # Secrets (JWT_SECRET, OPENAI_API_KEY, ...) come from server/.env.
+    env_file: server/.env
+    environment:
+      DATABASE_URL: postgresql://etken:etken@db:5432/etken?sslmode=disable
+      PORT: "8787"
+    # Host port is configurable; 25925 avoids clashing with other projects.
+    ports: ["${API_PORT:-25925}:8787"]
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: unless-stopped
+
 volumes:
   etken-db:
